@@ -1,82 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HSR Optimizer with UID</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSR UID Fetcher</title>
   <style>
-    body { background-color: #1e1e2f; color: #f0f0f0; font-family: Arial, sans-serif; }
-    header { background: #2e2e4d; padding: 1rem; text-align: center; font-size: 1.5rem; color: white; }
-    main { padding: 2rem; max-width: 1000px; margin: auto; }
-    .section { background: #2b2b40; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; }
-    label { display: block; margin-bottom: 0.5rem; }
-    input, button { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 5px; background: #444; color: white; border: none; }
-    button { background-color: #4caf50; cursor: pointer; }
-    .output { background: #121218; padding: 1rem; border-radius: 6px; font-family: monospace; }
+    body { font-family: Arial, sans-serif; padding: 2rem; }
+    input, button { padding: 0.5rem; margin: 0.5rem 0; }
+    pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; }
   </style>
 </head>
 <body>
+  <h1>Honkai: Star Rail UID Fetcher</h1>
+  <input type="text" id="uid-input" placeholder="ใส่ UID ของคุณ" />
+  <button id="fetch-button">ดึงข้อมูล</button>
+  <pre id="result"></pre>
 
-<header>HSR Optimizer with UID</header>
+  <script>
+    const uidInput = document.getElementById("uid-input");
+    const fetchButton = document.getElementById("fetch-button");
+    const resultContainer = document.getElementById("result");
 
-<main>
-  <div class="section">
-    <label for="uid">Enter UID</label>
-    <input type="text" id="uid" placeholder="Enter your UID">
-
-    <button onclick="fetchData()">Fetch Data</button>
-
-    <div id="result" class="output">
-      Result will be shown here...
-    </div>
-  </div>
-</main>
-
-<footer>
-  Built by You - Inspired by Fribbels
-</footer>
-
-<script>
-  async function fetchData() {
-    const uid = document.getElementById('uid').value;
-    if (!uid) {
-      document.getElementById('result').innerText = "Please enter a valid UID.";
-      return;
-    }
-
-    try {
-      // Replace this URL with your backend API URL (proxy)
-      const apiUrl = `https://your-proxy-server.com/api/fetchData?uid=${uid}`;
-
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-
-      if (data && data.success) {
-        const character = data.character;
-        const atk = character.attack;
-        const critRate = character.critRate;
-        const critDmg = character.critDmg;
-        
-        // Calculate Expected Damage
-        const multiplier = 2.5; // Example skill multiplier
-        const critFactor = (1 + (critRate / 100) * (critDmg / 100));
-        const expectedDamage = atk * multiplier * critFactor;
-
-        document.getElementById('result').innerText = `
-          Character: ${character.name}
-          ATK: ${atk}
-          Crit Rate: ${critRate}%
-          Crit DMG: ${critDmg}%
-          Expected Damage: ${expectedDamage.toFixed(2)}
-        `;
-      } else {
-        document.getElementById('result').innerText = "Failed to fetch data. Check UID.";
+    fetchButton.addEventListener("click", async () => {
+      const uid = uidInput.value.trim();
+      if (!uid) {
+        resultContainer.innerText = "กรุณาใส่ UID";
+        return;
       }
-    } catch (error) {
-      document.getElementById('result').innerText = "Error fetching data.";
-    }
-  }
-</script>
 
+      resultContainer.innerText = "กำลังโหลดข้อมูล...";
+
+      try {
+        const response = await fetch(`https://enka.network/api/hsr/u/${uid}`);
+        if (!response.ok) {
+          throw new Error("ไม่สามารถดึงข้อมูลได้");
+        }
+
+        const data = await response.json();
+        resultContainer.innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultContainer.innerText = `เกิดข้อผิดพลาด: ${err.message}`;
+      }
+    });
+  </script>
 </body>
 </html>
