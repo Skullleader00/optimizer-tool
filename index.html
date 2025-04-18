@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Optimizer Tool</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select, button {
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 15px;
+    }
+    .output {
+      background: #eee;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .donate {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .donate img {
+      max-width: 150px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Optimizer Tool</h1>
+    <label for="value1">Value 1</label>
+    <input type="number" id="value1" placeholder="Enter number" />
+
+    <label for="value2">Value 2</label>
+    <input type="number" id="value2" placeholder="Enter number" />
+
+    <button onclick="calculate()">Optimize</button>
+
+    <div class="output" id="result">Result will appear here...</div>
+
+    <div class="donate">
+      <p>If you found this tool useful, consider supporting me:</p>
+      <img src="https://promptpay.io/0888888888/qrcode.png" alt="Donate via PromptPay">
+      <p>PromptPay: 088-888-8888</p>
+    </div>
+  </div>
+
+  <script>
+    function calculate() {
+      const val1 = parseFloat(document.getElementById('value1').value);
+      const val2 = parseFloat(document.getElementById('value2').value);
+
+      if (isNaN(val1) || isNaN(val2)) {
+        document.getElementById('result').innerText = 'Please enter valid numbers';
+        return;
+      }
+
+      // Simple optimizer logic: maximize product
+      const result = val1 * val2;
+      document.getElementById('result').innerText = `Optimized Result: ${result}`;
+    }
+  </script>
+</body>
+</html>
