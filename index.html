@@ -3,83 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Optimizer Tool</title>
+  <title>HSR Optimizer Lite</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f0f2f5;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #1e1e2f;
+      color: #f0f0f0;
     }
-    .container {
-      max-width: 800px;
+    header {
+      background-color: #2e2e4d;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    main {
+      padding: 2rem;
+      max-width: 1000px;
       margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
+    .section {
+      background: #2b2b40;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
     }
     label {
       display: block;
-      margin: 10px 0 5px;
+      margin-bottom: 0.5rem;
     }
     input, select, button {
-      padding: 8px;
       width: 100%;
-      box-sizing: border-box;
-      margin-bottom: 15px;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      border: none;
+      background: #444;
+      color: white;
+    }
+    button {
+      background-color: #4caf50;
+      cursor: pointer;
     }
     .output {
-      background: #eee;
-      padding: 10px;
+      background: #121218;
+      padding: 1rem;
       border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
     }
-    .donate {
+    footer {
       text-align: center;
-      margin-top: 30px;
-    }
-    .donate img {
-      max-width: 150px;
+      font-size: 0.8rem;
+      margin-top: 2rem;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Optimizer Tool</h1>
-    <label for="value1">Value 1</label>
-    <input type="number" id="value1" placeholder="Enter number" />
+  <header>HSR Optimizer Lite</header>
+  <main>
+    <div class="section">
+      <label for="atk">ATK</label>
+      <input type="number" id="atk" placeholder="Enter base ATK">
 
-    <label for="value2">Value 2</label>
-    <input type="number" id="value2" placeholder="Enter number" />
+      <label for="crit">Crit Rate (%)</label>
+      <input type="number" id="crit" placeholder="Enter crit rate">
 
-    <button onclick="calculate()">Optimize</button>
+      <label for="critdmg">Crit DMG (%)</label>
+      <input type="number" id="critdmg" placeholder="Enter crit damage">
 
-    <div class="output" id="result">Result will appear here...</div>
+      <label for="multiplier">Skill Multiplier</label>
+      <input type="number" id="multiplier" placeholder="Enter multiplier (e.g., 2.5)">
 
-    <div class="donate">
-      <p>If you found this tool useful, consider supporting me:</p>
-      <img src="https://promptpay.io/0888888888/qrcode.png" alt="Donate via PromptPay">
-      <p>PromptPay: 088-888-8888</p>
+      <button onclick="optimize()">Optimize</button>
+
+      <div class="output" id="result">Result will be shown here...</div>
     </div>
-  </div>
+  </main>
+
+  <footer>
+    Built by You - Inspired by Fribbels
+  </footer>
 
   <script>
-    function calculate() {
-      const val1 = parseFloat(document.getElementById('value1').value);
-      const val2 = parseFloat(document.getElementById('value2').value);
+    function optimize() {
+      const atk = parseFloat(document.getElementById('atk').value);
+      const crit = parseFloat(document.getElementById('crit').value);
+      const critdmg = parseFloat(document.getElementById('critdmg').value);
+      const multiplier = parseFloat(document.getElementById('multiplier').value);
 
-      if (isNaN(val1) || isNaN(val2)) {
-        document.getElementById('result').innerText = 'Please enter valid numbers';
+      if (isNaN(atk) || isNaN(crit) || isNaN(critdmg) || isNaN(multiplier)) {
+        document.getElementById('result').innerText = 'Please enter all values correctly.';
         return;
       }
 
-      // Simple optimizer logic: maximize product
-      const result = val1 * val2;
-      document.getElementById('result').innerText = `Optimized Result: ${result}`;
+      const critRate = Math.min(crit, 100) / 100;
+      const critDamage = critdmg / 100;
+      const expectedMultiplier = (1 + critRate * critDamage);
+      const expectedDamage = atk * multiplier * expectedMultiplier;
+
+      const resultText = `Expected Damage: ${expectedDamage.toFixed(2)}\n(Crit Rate: ${critRate * 100}%, Crit DMG: ${critdmg}%)`;
+      document.getElementById('result').innerText = resultText;
     }
   </script>
 </body>
