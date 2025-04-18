@@ -1,66 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HSR Optimizer Lite</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 1rem;
-      margin-right: 10px;
-    }
-    .char-list {
-      margin-top: 20px;
-    }
-    .char {
-      padding: 10px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-    }
-  </style>
+  <title>HSR Optimizer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>HSR Optimizer Lite</h1>
-  <p>ใส่ UID เพื่อดึงข้อมูลตัวละครจาก Honkai: Star Rail</p>
+  <h1>HSR Optimizer</h1>
   <input type="text" id="uid" placeholder="กรอก UID">
   <button onclick="fetchData()">ดึงข้อมูล</button>
+  <div id="result"></div>
 
-  <div class="char-list" id="charList"></div>
-
-  <script>
-    async function fetchData() {
-      const uid = document.getElementById("uid").value;
-      const charList = document.getElementById("charList");
-      charList.innerHTML = "กำลังโหลด...";
-
-      try {
-        const res = await fetch(`https://your-proxy-url.workers.dev/api/${uid}`);
-        const data = await res.json();
-
-        if (!data.characters) {
-          charList.innerHTML = "ไม่พบข้อมูลตัวละคร หรือ UID ไม่ถูกต้อง";
-          return;
-        }
-
-        charList.innerHTML = "";
-        Object.values(data.characters).forEach((char) => {
-          const div = document.createElement("div");
-          div.className = "char";
-          div.innerHTML = `<strong>${char.name || "ชื่อไม่ทราบ"}</strong><br>Lv: ${char.level || "??"}`;
-          charList.appendChild(div);
-        });
-
-      } catch (err) {
-        charList.innerHTML = "เกิดข้อผิดพลาด: " + err.message;
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
