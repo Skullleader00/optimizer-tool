@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>คำนวณดาเมจ Honkai: Star Rail</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #151821;
+      --text: #e6e9f0;
+      --muted: #9aa3b2;
+      --accent: #7cd1f9;
+      --accent2: #a6e3a1;
+      --danger: #f38ba8;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+    }
+
+    header {
+      padding: 20px;
+      border-bottom: 1px solid #232636;
+      background: linear-gradient(180deg, #111422, #0f1115);
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.4px;
+    }
+    header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid #232636;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    h2 {
+      margin: 4px 0 12px;
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #2a2f40;
+      background: #10131b;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #2a2f40;
+      background: #111524;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button.primary {
+      background: #132035;
+      border-color: #1c2a44;
+      color: #cfe8ff;
+    }
+    button.primary:hover {
+      background: #172642;
+    }
+
+    .result {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      background: #10131b;
+      border: 1px solid #2a2f40;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .pill h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .pill .num {
+      font-size: 20px;
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .tips {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border: 1px solid #2a2f40;
+      border-radius: 8px;
+      margin-right: 6px;
+      color: #c2caf5;
+      font-size: 12px;
+    }
+
+    .warn {
+      color: var(--danger);
+    }
+
+    /* ===== RESPONSIVE MOBILE ===== */
+    @media (max-width: 900px) {
+      header h1 { font-size: 20px; }
+      header p { font-size: 13px; }
+      .container {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+      .grid, .row, .result {
+        grid-template-columns: 1fr;
+      }
+      .card { padding: 14px; }
+      .actions { flex-direction: column; }
+      button { width: 100%; }
+      .pill .num { font-size: 18px; }
+      footer { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>คำนวณดาเมจ Honkai: Star Rail</h1>
+    <p>เลือกตัวละคร 5★ ใส่สเตตัส ประเมินดาเมจคร่าวๆ ทั้งแบบคริและเฉลี่ย</p>
+  </header>
+
+  <div class="container">
+    <!-- ส่วนคำนวณหลัก -->
+    <section class="card">
+      <h2>เลือกตัวละคร 5★ และพารามิเตอร์หลัก</h2>
+
+      <div class="row">
+        <div>
+          <label>ตัวละคร 5★</label>
+          <select id="character">
+            <option value="Seele">Seele (Hunt / Quantum)</option>
+            <option value="DanHengIL">Dan Heng • Imbibitor Lunae (Destruction / Imaginary)</option>
+            <option value="Jingliu">Jingliu (Destruction / Ice)</option>
+            <option value="Blade">Blade (Destruction / Wind)</option>
+            <option value="Kafka">Kafka (Nihility / Lightning)</option>
+            <option value="SilverWolf">Silver Wolf (Nihility / Quantum)</option>
+            <option value="Bronya">Bronya (Harmony / Wind)</option>
+            <option value="RuanMei">Ruan Mei (Harmony / Ice)</option>
+            <option value="Sparkle">Sparkle (Harmony / Quantum)</option>
+            <option value="Robin">Robin (Harmony / Physical)</option>
+            <option value="Aventurine">Aventurine (Preservation / Imaginary)</option>
+            <option value="JingYuan">Jing Yuan (Erudition / Lightning)</option>
+            <option value="Topaz">Topaz & Numby (Hunt / Fire)</option>
+            <option value="Clara">Clara (Destruction / Physical)</option>
+            <option value="Huohuo">Huohuo (Abundance / Wind)</option>
+            <option value="Luocha">Luocha (Abundance / Imaginary)</option>
+          </select>
+        </div>
+        <div>
+          <label>ประเภทสเกลของสกิล</label>
+          <select id="scaleType">
+            <option value="ATK">ATK</option>
+            <option value="HP">HP</option>
+            <option value="DEF">DEF</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div><label>ค่าสเตตัสพื้นฐาน</label><input id="baseStat" type="number" placeholder="เช่น 3000" /></div>
+        <div><label>ตัวคูณสกิล (%)</label><input id="skillPct" type="number" placeholder="เช่น 240" /></div>
+        <div><label>โบนัสดาเมจ (%)</label><input id="dmgBonusPct" type="number" placeholder="เช่น 60" /></div>
+        <div><label>โอกาสคริติคอล (%)</label><input id="critRatePct" type="number" placeholder="เช่น 50" /></div>
+        <div><label>ความแรงคริติคอล (%)</label><input id="critDmgPct" type="number" placeholder="เช่น 120" /></div>
+        <div><label>เลเวลผู้โจมตี</label><input id="atkLevel" type="number" placeholder="เช่น 80" /></div>
+        <div><label>เลเวลศัตรู</label><input id="defLevel" type="number" placeholder="เช่น 90" /></div>
+        <div><label>ลด DEF ของศัตรู (%)</label><input id="defShredPct" type="number" placeholder="เช่น 20" /></div>
+        <div><label>ทนธาตุศัตรู (%)</label><input id="enemyResPct" type="number" placeholder="เช่น 10" /></div>
+        <div><label>เจาะ RES (%)</label><input id="resPenPct" type="number" placeholder="เช่น 20" /></div>
+        <div><label>ช่องโหว่/เพิ่ม DMG รับ (%)</label><input id="vulnPct" type="number" placeholder="เช่น 15" /></div>
+        <div><label>ตัวคูณพิเศษอื่นๆ</label><input id="extraMult" type="number" placeholder="เช่น 1" step="0.01" /></div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="calc()">คำนวณดาเมจ</button>
+        <button onclick="resetAll()">ล้างค่า</button>
+      </div>
+
+      <div class="result">
+        <div class="pill"><h3>ไม่คริติคอล</h3><div class="num" id="nonCrit">—</div></div>
+        <div class="pill"><h3>คริติคอล</h3><div class="num" id="crit">—</div></div>
+        <div class="pill"><h3>ค่าเฉลี่ย</h3><div class="num" id="expected">—</div></div>
+      </div>
+
+      <p class="note">
+        ค่านี้เป็นการประมาณ ไม่รวมเงื่อนไขเฉพาะตัวละคร (เช่น สแต็ค, บัฟพิเศษ, Break, DoT)
+      </p>
+    </section>
+
+    <!-- ส่วนอธิบายสูตร -->
+    <section class="card">
+      <h2>สูตรที่ใช้ในการประมาณ</h2>
+      <div class="tips">
+        - ดาเมจดิบ = สเตตัส × ตัวคูณสกิล × (1 + โบนัสดาเมจ)<br/>
+        - ตัวคูณ DEF, RES, ช่องโหว่ รวมตามลำดับ<br/>
+        - ค่าเฉลี่ย = ไม่คริ × (1 - โอกาสคริ) + คริ × (โอกาสคริ)
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="card">
+      <h2>แหล่งอ้างอิง</h2>
+      <ul>
+        <li><a href="https://honkai-star-rail.fandom.com/th/wiki/" target="_blank">Honkai: Star Rail Wiki (TH)</a></li>
+        <li><a href="https://www.online-station.net/mobile-game/905885" target="_blank">Online Station: แนวทางตัวละคร</a></li>
+        <li><a href="https://www.youtube.com/watch?v=AU1KK0LtnOE" target="_blank">YouTube: หลักการคำนวณดาเมจ</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    function val(id){const v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
+    function resetAll(){
+      ["baseStat","skillPct","dmgBonusPct","critRatePct","critDmgPct","atkLevel","defLevel","defShredPct","enemyResPct","resPenPct","vulnPct","extraMult"].forEach(id=>{
+        document.getElementById(id).value="";
+      });
+      ["nonCrit","crit","expected"].forEach(id=>{document.getElementById(id).textContent="—";});
+    }
+    function clamp(x,min,max){return Math.max(min,Math.min(max,x));}
+    function fmt(n){if(!isFinite(n)||isNaN(n))return"—";if(n<100000)return Math.round(n).toLocaleString();return n.toLocaleString(undefined,{maximumFractionDigits:0});}
+    function calc(){
+      const S=val("baseStat"),M=val("skillPct"),B=val("dmgBonusPct"),Cr=clamp(val("critRatePct"),0,100),Cd=val("critDmgPct"),
+      La=val("atkLevel"),Le=val("defLevel"),Ds=clamp(val("defShredPct"),0,100),Re=clamp(val("enemyResPct"),-100,90),
+      Pr=clamp(val("resPenPct"),0,100),V=val("vulnPct"),E=(val("extraMult")||1);
+
+      const Base=S*(M/100)*(1+B/100);
+      const DEFMult=(La+20)/((La+20)+(Le+20)*(1-Ds/100));
+      const effectiveRes=Math.max(0,(Re-Pr)/100);
+      const RESMult=1-effectiveRes;
+      const VulnMult=1+V/100;
+
+      const NonCrit=Base*DEFMult*RESMult*VulnMult*(E||1);
+      const Crit=NonCrit*(1+Cd/100);
+      const Expected=NonCrit*(1-Cr/100)+Crit*(Cr/100);
+
+      document.getElementById("nonCrit").textContent=fmt(NonCrit);
+      document.getElementById("crit").textContent=fmt(Crit);
+      document.getElementById("expected").textContent=fmt(Expected);
+    }
+  </script>
+</body>
+</html>
