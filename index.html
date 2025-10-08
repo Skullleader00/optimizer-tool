@@ -1,16 +1,310 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>HSR Optimizer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>คำนวณดาเมจ Honkai: Star Rail</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #151821;
+      --text: #e6e9f0;
+      --muted: #9aa3b2;
+      --accent: #7cd1f9;
+      --accent2: #a6e3a1;
+      --danger: #f38ba8;
+    }
+    body { background: var(--bg); color: var(--text); font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; }
+    header { padding: 24px; border-bottom: 1px solid #232636; background: linear-gradient(180deg, #111422, #0f1115); }
+    header h1 { margin: 0; font-size: 24px; letter-spacing: 0.4px; }
+    header p { margin: 6px 0 0; color: var(--muted); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+    .card { background: var(--card); border: 1px solid #232636; border-radius: 12px; padding: 16px; }
+    h2 { margin: 4px 0 12px; font-size: 18px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #2a2f40; background: #10131b; color: var(--text); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .actions { display: flex; gap: 10px; margin-top: 12px; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #2a2f40; background: #111524; color: var(--text); cursor: pointer; }
+    button.primary { background: #132035; border-color: #1c2a44; color: #cfe8ff; }
+    button.primary:hover { background: #172642; }
+    .result { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .pill { background: #10131b; border: 1px solid #2a2f40; border-radius: 12px; padding: 12px; }
+    .pill h3 { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
+    .pill .num { font-size: 20px; color: var(--accent2); font-weight: 600; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .tips { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    footer { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .badge { display:inline-block; padding:4px 8px; border:1px solid #2a2f40; border-radius:8px; margin-right:6px; color:#c2caf5; }
+    .warn { color: var(--danger); }
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+      .grid, .row, .result { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <h1>HSR Optimizer</h1>
-  <input type="text" id="uid" placeholder="กรอก UID">
-  <button onclick="fetchData()">ดึงข้อมูล</button>
-  <div id="result"></div>
+  <header>
+    <h1>คำนวณดาเมจ Honkai: Star Rail</h1>
+    <p>เลือกตัวละคร 5★ ใส่สเตตัส ประเมินดาเมจคร่าวๆ ทั้งแบบติดคริติคอลและค่าเฉลี่ย</p>
+  </header>
 
-  <script src="script.js"></script>
+  <div class="container">
+    <section class="card">
+      <h2>เลือกตัวละคร 5★ และพารามิเตอร์หลัก</h2>
+
+      <div class="row">
+        <div>
+          <label>ตัวละคร 5★</label>
+          <select id="character">
+            <option value="Seele">Seele (Hunt / Quantum)</option>
+            <option value="DanHengIL">Dan Heng • Imbibitor Lunae (Destruction / Imaginary)</option>
+            <option value="Jingliu">Jingliu (Destruction / Ice)</option>
+            <option value="Blade">Blade (Destruction / Wind)</option>
+            <option value="Kafka">Kafka (Nihility / Lightning)</option>
+            <option value="SilverWolf">Silver Wolf (Nihility / Quantum)</option>
+            <option value="Bronya">Bronya (Harmony / Wind)</option>
+            <option value="RuanMei">Ruan Mei (Harmony / Ice)</option>
+            <option value="Sparkle">Sparkle (Harmony / Quantum)</option>
+            <option value="Robin">Robin (Harmony / Physical)</option>
+            <option value="Aventurine">Aventurine (Preservation / Imaginary)</option>
+            <option value="JingYuan">Jing Yuan (Erudition / Lightning)</option>
+            <option value="Topaz">Topaz & Numby (Hunt / Fire)</option>
+            <option value="Clara">Clara (Destruction / Physical)</option>
+            <option value="Huohuo">Huohuo (Abundance / Wind)</option>
+            <option value="Luocha">Luocha (Abundance / Imaginary)</option>
+          </select>
+        </div>
+        <div>
+          <label>ประเภทสเกลของสกิล</label>
+          <select id="scaleType">
+            <option value="ATK">ATK</option>
+            <option value="HP">HP</option>
+            <option value="DEF">DEF</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>ค่าสเตตัสพื้นฐาน (ตามประเภทสเกล)</label>
+          <input id="baseStat" type="number" placeholder="เช่น ATK รวม 3000" />
+        </div>
+        <div>
+          <label>ตัวคูณสกิล (%)</label>
+          <input id="skillPct" type="number" placeholder="เช่น 240 (หมายถึง 240%)" />
+        </div>
+
+        <div>
+          <label>โบนัสดาเมจรวม (%)</label>
+          <input id="dmgBonusPct" type="number" placeholder="เช่น 60 (จากคอม,โคนนิ่ง,บัฟ)" />
+        </div>
+        <div>
+          <label>โอกาสคริติคอล (%)</label>
+          <input id="critRatePct" type="number" placeholder="เช่น 50" />
+        </div>
+
+        <div>
+          <label>ความแรงคริติคอล (%)</label>
+          <input id="critDmgPct" type="number" placeholder="เช่น 120" />
+        </div>
+        <div>
+          <label>เลเวลผู้โจมตี</label>
+          <input id="atkLevel" type="number" placeholder="เช่น 80" />
+        </div>
+
+        <div>
+          <label>เลเวลศัตรู</label>
+          <input id="defLevel" type="number" placeholder="เช่น 90" />
+        </div>
+        <div>
+          <label>ลด DEF ของศัตรู (%)</label>
+          <input id="defShredPct" type="number" placeholder="เช่น 20" />
+        </div>
+
+        <div>
+          <label>ทนธาตุศัตรู (RES) (%)</label>
+          <input id="enemyResPct" type="number" placeholder="เช่น 10" />
+        </div>
+        <div>
+          <label>เจาะ RES (%)</label>
+          <input id="resPenPct" type="number" placeholder="เช่น 20" />
+        </div>
+
+        <div>
+          <label>ช่องโหว่/เพิ่ม DMG รับ (%)</label>
+          <input id="vulnPct" type="number" placeholder="เช่น 15" />
+        </div>
+        <div>
+          <label>ตัวคูณพิเศษอื่นๆ</label>
+          <input id="extraMult" type="number" placeholder="เช่น 1 (ถ้าไม่มี)" step="0.01" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="calc()">คำนวณดาเมจ</button>
+        <button onclick="resetAll()">ล้างค่า</button>
+      </div>
+
+      <div class="result">
+        <div class="pill">
+          <h3>ไม่คริติคอล</h3>
+          <div class="num" id="nonCrit">—</div>
+        </div>
+        <div class="pill">
+          <h3>คริติคอล</h3>
+          <div class="num" id="crit">—</div>
+        </div>
+        <div class="pill">
+          <h3>ค่าเฉลี่ยตามโอกาสคริติคอล</h3>
+          <div class="num" id="expected">—</div>
+        </div>
+      </div>
+
+      <p class="note">
+        ค่าที่แสดงเป็นการประมาณเชิงทฤษฎี ใช้สำหรับเปรียบเทียบแนวทางบิลด์และบัฟต่างๆ ไม่ใช่ค่าจริงทุกสถานการณ์
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>สูตรที่ใช้ในการประมาณ</h2>
+      <div class="tips">
+        <span class="badge">ขั้นพื้นฐาน</span>
+        ดาเมจพื้นฐานคำนวณจากสเตตัสที่สกิลสเกลและตัวคูณสกิล รวมโบนัสดาเมจ, คริติคอล, ปัจจัย DEF/RES, และบัฟช่องโหว่/เจาะค่าต้านธาตุ
+        <br/><br/>
+        <span class="badge">นิยามสั้นๆ</span>
+        - ดาเมจดิบ = สเตตัสที่สเกล × ตัวคูณสกิล × (1 + โบนัสดาเมจ)<br/>
+        - ตัวคูณคริติคอล = 1 (ไม่คริติคอล) หรือ (1 + ความแรงคริติคอล) (คริติคอล)<br/>
+        - ค่าเฉลี่ย = ดาเมจไม่คริ × (1 - โอกาสคริ) + ดาเมจคริ × โอกาสคริ
+        <br/><br/>
+        <span class="badge">ปัจจัย DEF แบบง่าย</span>
+        ใช้รูปแบบลดหลั่นกับระดับเลเวล เพื่อให้สะท้อนผลของการลด DEF ได้อย่างคร่าวๆ
+      </div>
+      <div class="tips" style="margin-top:10px">
+        <span class="badge">LaTeX</span>
+        สมการสรุป:
+        <div style="background:#10131b;border:1px solid #2a2f40;border-radius:10px;padding:10px;margin-top:8px">
+          \[
+          \text{Base} = S \cdot \frac{M}{100} \cdot \left(1 + \frac{B}{100}\right)
+          \]
+          \[
+          \text{DEFMult} = \frac{L_a + 20}{L_a + 20 + (L_e + 20)\cdot(1 - \frac{D_s}{100})}
+          \]
+          \[
+          \text{RESMult} = 1 - \max\left(0, \frac{R_e - P_r}{100}\right)
+          \]
+          \[
+          \text{VulnMult} = 1 + \frac{V}{100}
+          \]
+          \[
+          \text{NonCrit} = \text{Base} \cdot \text{DEFMult} \cdot \text{RESMult} \cdot \text{VulnMult} \cdot E
+          \]
+          \[
+          \text{Crit} = \text{NonCrit} \cdot \left(1 + \frac{C_d}{100}\right)
+          \]
+          \[
+          \mathbb{E}[\text{DMG}] = \text{NonCrit}\cdot\left(1 - \frac{C_r}{100}\right) + \text{Crit}\cdot\left(\frac{C_r}{100}\right)
+          \]
+          โดยที่ \(S\)=สเตตัสสเกล, \(M\)=%ตัวคูณสกิล, \(B\)=%โบนัสดาเมจ, \(L_a\)=เลเวลผู้โจมตี, \(L_e\)=เลเวลศัตรู, \(D_s\)=%ลด DEF,
+          \(R_e\)=%ทนธาตุศัตรู, \(P_r\)=%เจาะ RES, \(V\)=%ช่องโหว่/เพิ่ม DMG รับ, \(E\)=ตัวคูณพิเศษอื่นๆ, \(C_d\)=%ความแรงคริติคอล, \(C_r\)=%โอกาสคริติคอล
+        </div>
+      </div>
+      <p class="note warn">
+        หมายเหตุ: สูตรนี้เป็นการประมาณทั่วไปเพื่อประเมินแนวโน้มการบิลด์ ไม่ครอบคลุมกลไกเฉพาะ (เช่น Break, DoT ของ Kafka, Extra turn, สแต็คเฉพาะตัวละคร ฯลฯ)
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    <div class="card">
+      <h2>แนวทางเลือกตัวละคร 5★ ที่นิยม</h2>
+      <div class="tips">
+        <span class="badge">Hypercarry</span> Seele, Dan Heng • Imbibitor Lunae, Jingliu, Blade
+        <br/>
+        <span class="badge">Buffer/Support</span> Bronya, Ruan Mei, Sparkle, Robin, Aventurine
+        <br/>
+        <span class="badge">Debuffer/Utility</span> Silver Wolf
+        <br/>
+        <span class="badge">Erudition/AOE</span> Jing Yuan
+        <br/>
+        <span class="badge">Healer/Sustain</span> Luocha, Huohuo
+      </div>
+      <p class="note">
+        รายชื่อตัวละครอ้างอิงจากฐานข้อมูลและบทความชุมชนภาษาไทยที่ครอบคลุมเมต้าและข้อมูลตัวละคร[43dcd9a7-70db-4a1f-b0ae-981daa162054](https://honkai-star-rail.fandom.com/th/wiki/%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%A5%E0%B8%B0%E0%B8%84%E0%B8%A3?citationMarker=43dcd9a7-70db-4a1f-b0ae-981daa162054 "1")[43dcd9a7-70db-4a1f-b0ae-981daa162054](https://www.online-station.net/mobile-game/905885?citationMarker=43dcd9a7-70db-4a1f-b0ae-981daa162054 "2") 
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>แหล่งอ้างอิงที่ใช้</h2>
+      <ul>
+        <li>
+          <strong>Honkai: Star Rail Wiki (ภาษาไทย)</strong> — หน้ารวมตัวละครและข้อมูลเบื้องต้น, ใช้ยืนยันรายชื่อและ Path/ธาตุของตัวละคร 5★[43dcd9a7-70db-4a1f-b0ae-981daa162054](https://honkai-star-rail.fandom.com/th/wiki/%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%A5%E0%B8%B0%E0%B8%84%E0%B8%A3?citationMarker=43dcd9a7-70db-4a1f-b0ae-981daa162054 "1")
+        </li>
+        <li>
+          <strong>Online Station</strong> — บทความแนะแนวบิลด์และภาพรวมเมต้า ช่วยอ้างอิงบทบาทตัวละคร (DPS/Support/Sustain) เพื่อจัดหมวดหมู่ในหน้าเว็บนี้[43dcd9a7-70db-4a1f-b0ae-981daa162054](https://www.online-station.net/mobile-game/905885?citationMarker=43dcd9a7-70db-4a1f-b0ae-981daa162054 "2")
+        </li>
+        <li>
+          <strong>วิดีโอคำนวณดาเมจ</strong> — เนื้อหาภาษาไทยว่าด้วยหลักการคำนวณดาเมจ ใช้เป็นแรงบันดาลใจในการออกแบบอินพุตและผลลัพธ์ของเครื่องคำนวณนี้[43dcd9a7-70db-4a1f-b0ae-981daa162054](https://www.youtube.com/watch?v=AU1KK0LtnOE&citationMarker=43dcd9a7-70db-4a1f-b0ae-981daa162054 "3")
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    function val(id) {
+      const v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) ? 0 : v;
+    }
+    function resetAll() {
+      ["baseStat","skillPct","dmgBonusPct","critRatePct","critDmgPct","atkLevel","defLevel","defShredPct","enemyResPct","resPenPct","vulnPct","extraMult"].forEach(id=>{
+        document.getElementById(id).value="";
+      });
+      ["nonCrit","crit","expected"].forEach(id=>{
+        document.getElementById(id).textContent="—";
+      });
+    }
+    function clamp(x, min, max) { return Math.max(min, Math.min(max, x)); }
+    function fmt(n) {
+      if (!isFinite(n) || isNaN(n)) return "—";
+      if (n < 100000) return Math.round(n).toLocaleString();
+      return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    }
+    function calc() {
+      const S = val("baseStat");
+      const M = val("skillPct");
+      const B = val("dmgBonusPct");
+      const Cr = clamp(val("critRatePct"), 0, 100);
+      const Cd = val("critDmgPct");
+      const La = val("atkLevel");
+      const Le = val("defLevel");
+      const Ds = clamp(val("defShredPct"), 0, 100); // simple cap
+      const Re = clamp(val("enemyResPct"), -100, 90); // typical res bounds
+      const Pr = clamp(val("resPenPct"), 0, 100);
+      const V  = val("vulnPct");
+      const E  = (val("extraMult") || 1);
+
+      // Base damage before defenses
+      const Base = S * (M/100) * (1 + B/100);
+
+      // DEF multiplier (approximate)
+      const DEFMult = (La + 20) / ( (La + 20) + (Le + 20) * (1 - Ds/100) );
+
+      // RES multiplier (approximate, floor at 0 to avoid healing scenarios)
+      const effectiveRes = Math.max(0, (Re - Pr)/100);
+      const RESMult = 1 - effectiveRes;
+
+      // Vulnerability multiplier
+      const VulnMult = 1 + V/100;
+
+      const NonCrit = Base * DEFMult * RESMult * VulnMult * (E || 1);
+      const Crit = NonCrit * (1 + Cd/100);
+      const Expected = NonCrit * (1 - Cr/100) + Crit * (Cr/100);
+
+      document.getElementById("nonCrit").textContent = fmt(NonCrit);
+      document.getElementById("crit").textContent = fmt(Crit);
+      document.getElementById("expected").textContent = fmt(Expected);
+    }
+  </script>
 </body>
 </html>
